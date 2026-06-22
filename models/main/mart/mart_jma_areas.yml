@@ -1,0 +1,47 @@
+version: 2
+
+models:
+  - name: mart_jma_areas
+    description: 気象庁の地域コード（予報区の階層）
+    access: public
+    config:
+      contract:
+        enforced: true
+    meta:
+      title: "気象庁 地域コード"
+      tags: ["気象", "地域コード", "予報区", "気象庁"]
+      source_url: "https://www.jma.go.jp/bosai/common/const/area.json"
+      published: true
+    columns:
+      - name: area_code
+        data_type: VARCHAR
+        meta:
+          title: 地域コード
+      - name: level
+        data_type: VARCHAR
+        meta:
+          title: 階層
+          description: center / office / class10 / class15 / class20
+      - name: name
+        data_type: VARCHAR
+        meta:
+          title: 地域名
+      - name: name_en
+        data_type: VARCHAR
+        meta:
+          title: 地域名（英語）
+      - name: name_kana
+        data_type: VARCHAR
+        meta:
+          title: 地域名（カナ）
+          description: class20（市区町村）のみ
+      - name: office_name
+        data_type: VARCHAR
+        meta:
+          title: 担当気象台名
+          description: center / office のみ
+      - name: parent_code
+        data_type: VARCHAR
+        meta:
+          title: 親地域コード
+          description: 上位階層のコード（centerはNULL）

@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: raw_jma_stations
+    description: 気象庁アメダス観測所一覧（amedastable.json）の生データ
+    columns:
+      - name: station_id
+        description: 観測所ID（アメダス番号、5桁）
+      - name: name
+        description: 観測所名（漢字）
+      - name: name_kana
+        description: 観測所名（カナ）
+      - name: name_en
+        description: 観測所名（英語）
+      - name: lat
+        description: 緯度（十進度）
+      - name: lon
+        description: 経度（十進度）
+      - name: elevation
+        description: 標高（m）
+      - name: station_type
+        description: 観測所種別（A〜G）
+      - name: is_office
+        description: 気象官署フラグ（種別A/B）
+      - name: elems
+        description: 観測種目フラグ（気象庁仕様の8桁文字列）
+
+  - name: raw_jma_areas
+    description: 気象庁の地域コード（area.json）の生データ
+    columns:
+      - name: area_code
+        description: 地域コード
+      - name: level
+        description: 階層（center/office/class10/class15/class20）
+      - name: name
+        description: 地域名
+      - name: name_en
+        description: 地域名（英語）
+      - name: name_kana
+        description: 地域名（カナ、class20のみ）
+      - name: office_name
+        description: 担当気象台名（center/officeのみ）
+      - name: parent_code
+        description: 親地域コード

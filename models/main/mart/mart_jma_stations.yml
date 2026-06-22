@@ -1,0 +1,62 @@
+version: 2
+
+models:
+  - name: mart_jma_stations
+    description: 気象庁アメダス観測所の一覧（位置・標高・観測所種別）
+    access: public
+    config:
+      contract:
+        enforced: true
+    meta:
+      title: "気象庁 観測所一覧（アメダス）"
+      tags: ["気象", "観測所", "アメダス", "気象庁"]
+      source_url: "https://www.jma.go.jp/bosai/amedas/"
+      published: true
+    columns:
+      - name: station_id
+        data_type: VARCHAR
+        meta:
+          title: 観測所ID
+          description: アメダス番号（5桁）
+      - name: name
+        data_type: VARCHAR
+        meta:
+          title: 観測所名
+      - name: name_kana
+        data_type: VARCHAR
+        meta:
+          title: 観測所名（カナ）
+      - name: name_en
+        data_type: VARCHAR
+        meta:
+          title: 観測所名（英語）
+      - name: lat
+        data_type: DOUBLE
+        meta:
+          title: 緯度
+          description: 十進度
+      - name: lon
+        data_type: DOUBLE
+        meta:
+          title: 経度
+          description: 十進度
+      - name: elevation
+        data_type: INTEGER
+        meta:
+          title: 標高
+          description: メートル
+      - name: station_type
+        data_type: VARCHAR
+        meta:
+          title: 観測所種別
+          description: 気象庁の分類（A〜G）。A/Bが気象官署相当
+      - name: is_office
+        data_type: BOOLEAN
+        meta:
+          title: 気象官署フラグ
+          description: 種別A/B（管区・地方気象台や測候所相当）
+      - name: elems
+        data_type: VARCHAR
+        meta:
+          title: 観測種目フラグ
+          description: 気象庁仕様の8桁文字列（観測している要素を表す）
