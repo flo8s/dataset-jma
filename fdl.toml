@@ -1,0 +1,26 @@
+name = "jma"
+command = "python main.py"
+
+[targets.default]
+url = "s3://${FDL_S3_BUCKET}"
+public_url = "https://data.queria.io"
+s3_endpoint = "${FDL_S3_ENDPOINT}"
+s3_access_key_id = "${FDL_S3_ACCESS_KEY_ID}"
+s3_secret_access_key = "${FDL_S3_SECRET_ACCESS_KEY}"
+
+[targets.local]
+url = "~/.local/share/fdl"
+public_url = "http://localhost:4001"
+
+[meta]
+license = "気象庁ホームページ利用規約（政府標準利用規約 第2.0版 準拠）"
+license_url = "https://www.jma.go.jp/jma/kishou/info/coment.html"
+title = "気象庁 気象データ"
+description = "気象庁の観測所一覧（アメダス）・予報区の地域コードと、気象官署の月別気象値（気温・降水量など）"
+cover = "⛅"
+tags = ['気象', '気温', '降水量', '観測所', 'アメダス']
+repository_url = "https://github.com/flo8s/dataset-jma"
+schedule = "monthly"
+
+[meta.schemas]
+main.title = "メイン"
