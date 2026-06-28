@@ -42,3 +42,35 @@ models:
         description: 担当気象台名（center/officeのみ）
       - name: parent_code
         description: 親地域コード
+
+  - name: raw_jma_hypocenters
+    description: 気象庁 地震月報（カタログ編）の震源データの生データ
+    columns:
+      - name: record_type
+        description: レコード種別（J:気象庁 / U:USGS / I:その他国際機関）
+      - name: origin_time
+        description: 震源時（オリジンタイム、日本標準時）
+      - name: latitude
+        description: 震央の緯度（十進度）
+      - name: longitude
+        description: 震央の経度（十進度）
+      - name: depth_km
+        description: 震源の深さ（km）
+      - name: magnitude
+        description: マグニチュード1（気象庁マグニチュード等）
+      - name: magnitude_type
+        description: マグニチュード1の種別（J/D/d/V/v/W/B/S）
+      - name: magnitude2
+        description: マグニチュード2
+      - name: magnitude2_type
+        description: マグニチュード2の種別
+      - name: subtype_code
+        description: 震源補助情報（1:通常地震 2:他機関依存 3:人工地震 4:噴火に伴う地震動等 5:低周波イベント）
+      - name: max_intensity_code
+        description: 最大震度コード（1〜7、A:5弱、B:5強、C:6弱、D:6強 ほか）
+      - name: region
+        description: 震央地名（英字）
+      - name: station_count
+        description: 震源決定に使用した観測点数
+      - name: hypocenter_flag
+        description: 震源決定フラグ（K/S/k/s/A/a/N/F）

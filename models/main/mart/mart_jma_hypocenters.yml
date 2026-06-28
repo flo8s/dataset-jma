@@ -1,0 +1,99 @@
+version: 2
+
+models:
+  - name: mart_jma_hypocenters
+    description: 気象庁 地震月報（カタログ編）の震源データ（発生日時・震央位置・深さ・マグニチュード）
+    access: public
+    config:
+      contract:
+        enforced: true
+    meta:
+      title: "気象庁 震源データ"
+      tags: ["地震", "震源", "マグニチュード", "気象庁"]
+      source_url: "https://www.data.jma.go.jp/eqev/data/bulletin/hypo.html"
+      published: true
+    columns:
+      - name: origin_time
+        data_type: TIMESTAMP
+        meta:
+          title: 震源時
+          description: オリジンタイム（日本標準時）
+      - name: latitude
+        data_type: DOUBLE
+        meta:
+          title: 緯度
+          description: 震央の緯度（十進度）
+      - name: longitude
+        data_type: DOUBLE
+        meta:
+          title: 経度
+          description: 震央の経度（十進度）
+      - name: depth_km
+        data_type: DOUBLE
+        meta:
+          title: 深さ
+          description: 震源の深さ（km）
+      - name: magnitude
+        data_type: DOUBLE
+        meta:
+          title: マグニチュード
+          description: マグニチュード1（気象庁マグニチュード等）。求まらなかった場合はNULL
+      - name: magnitude_type
+        data_type: VARCHAR
+        meta:
+          title: マグニチュード種別
+          description: J/D/d/V/v（気象庁）、W（モーメント）、B/S（他機関）
+      - name: magnitude2
+        data_type: DOUBLE
+        meta:
+          title: マグニチュード2
+          description: 第2のマグニチュード（求まらなかった場合はNULL）
+      - name: magnitude2_type
+        data_type: VARCHAR
+        meta:
+          title: マグニチュード2種別
+      - name: region
+        data_type: VARCHAR
+        meta:
+          title: 震央地名
+          description: 気象庁の震央地名（英字）
+      - name: record_source
+        data_type: VARCHAR
+        meta:
+          title: 震源決定機関
+          description: 気象庁 / USGS / 国際機関
+      - name: record_type
+        data_type: VARCHAR
+        meta:
+          title: レコード種別
+          description: J:気象庁 / U:USGS / I:その他国際機関
+      - name: subtype_code
+        data_type: VARCHAR
+        meta:
+          title: 震源補助情報コード
+          description: 1:通常地震 2:他機関依存 3:人工地震 4:噴火に伴う地震動等 5:低周波イベント
+      - name: subtype
+        data_type: VARCHAR
+        meta:
+          title: 震源補助情報
+          description: 震源補助情報コードの名称
+      - name: max_intensity_code
+        data_type: VARCHAR
+        meta:
+          title: 最大震度コード
+          description: 1〜7、A:5弱、B:5強、C:6弱、D:6強 ほか
+      - name: max_intensity
+        data_type: VARCHAR
+        meta:
+          title: 最大震度
+          description: 最大震度コードの名称（震度1〜震度7、震度5弱〜震度6強）
+      - name: station_count
+        data_type: INTEGER
+        meta:
+          title: 使用観測点数
+          description: 震源決定に使用した観測点の数
+      - name: hypocenter_flag
+        data_type: VARCHAR
+        meta:
+          title: 震源決定フラグ
+          description: K:気象庁震源 S:参考震源 k/s:簡易 A/a:自動 N:震源固定等 F:遠地
