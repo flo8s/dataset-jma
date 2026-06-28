@@ -16,9 +16,9 @@ public_url = "http://localhost:4001"
 license = "気象庁ホームページ利用規約（政府標準利用規約 第2.0版 準拠）"
 license_url = "https://www.jma.go.jp/jma/kishou/info/coment.html"
 title = "気象庁 気象データ"
-description = "気象庁の観測所一覧（アメダス）・予報区の地域コードと、気象官署の月別気象値（気温・降水量など）"
+description = "気象庁の観測所一覧（アメダス）・予報区の地域コードと、地震月報（カタログ編）の震源データ（発生日時・震央位置・深さ・マグニチュード）"
 cover = "⛅"
-tags = ['気象', '気温', '降水量', '観測所', 'アメダス']
+tags = ['気象', '観測所', 'アメダス', '地震', '震源', 'マグニチュード']
 repository_url = "https://github.com/flo8s/dataset-jma"
 schedule = "monthly"
 
