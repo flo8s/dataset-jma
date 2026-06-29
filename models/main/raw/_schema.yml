@@ -42,3 +42,25 @@ models:
         description: 担当気象台名（center/officeのみ）
       - name: parent_code
         description: 親地域コード
+
+  - name: raw_jma_normals_daily
+    description: アメダス日別平年値（1991〜2020年）の生データ。観測所×月日の1行
+    columns:
+      - name: station_id
+        description: 観測所番号（アメダス番号、5桁）
+      - name: month
+        description: 月（1〜12）
+      - name: day
+        description: 日（1〜31、2月は閏日29日まで）
+      - name: temp_avg_c
+        description: 日平均気温の平年値（℃）
+      - name: temp_max_c
+        description: 日最高気温の平年値（℃）
+      - name: temp_min_c
+        description: 日最低気温の平年値（℃）
+      - name: sunshine_hours
+        description: 日照時間の平年値（時間）
+      - name: precipitation_mm
+        description: 降水量の平年値（mm）
+      - name: snow_depth_cm
+        description: 積雪の深さの日最大の平年値（cm）

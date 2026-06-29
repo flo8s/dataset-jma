@@ -1,11 +1,12 @@
 ## データ出典
 
-[気象庁](https://www.jma.go.jp/bosai/amedas/)が公開している気象データです。観測所一覧（アメダス）と予報区の地域コードを収録しています。
+[気象庁](https://www.jma.go.jp/)が公開している気象データです。観測所一覧（アメダス）・予報区の地域コードと、アメダス観測所の日別平年値（1991〜2020年）を収録しています。
 
-非公式の JSON 配信（気象庁サイトが内部利用しているエンドポイント）を出典として利用しています。
+観測所一覧・地域コードは非公式の JSON 配信（気象庁サイトが内部利用しているエンドポイント）を、日別平年値は平年値ダウンロードの配布ファイルを出典として利用しています。
 
 - 観測所一覧: https://www.jma.go.jp/bosai/amedas/const/amedastable.json
 - 地域コード: https://www.jma.go.jp/bosai/common/const/area.json
+- 日別平年値: https://www.data.jma.go.jp/stats/data/mdrr/normal/index.html （normal_amedas_daily）
 
 ## テーブル: mart_jma_stations
 
@@ -30,9 +31,22 @@
 - office_name: 担当気象台名（VARCHAR、center / office のみ）
 - parent_code: 親地域コード（VARCHAR、center は NULL）
 
+## テーブル: mart_jma_normals_daily
+
+アメダス観測所の日別平年値（統計期間1991〜2020年）です。観測所×月日ごとに、気温・日照時間・降水量・積雪の深さの30年平均を持ちます。station_id で mart_jma_stations と結合できます。観測していない要素や統計値なしの日は NULL です（2月は閏日29日まで収録）。
+
+- station_id: 観測所ID（VARCHAR、アメダス番号5桁）
+- month / day: 月 / 日（INTEGER、月1〜12・日1〜31）
+- temp_avg_c: 日平均気温の平年値（DOUBLE、℃）
+- temp_max_c: 日最高気温の平年値（DOUBLE、℃）
+- temp_min_c: 日最低気温の平年値（DOUBLE、℃）
+- sunshine_hours: 日照時間の平年値（DOUBLE、時間）
+- precipitation_mm: 降水量の平年値（DOUBLE、mm）
+- snow_depth_cm: 積雪の深さ（日最大）の平年値（INTEGER、cm）
+
 ### データ更新手順
 
-main.py が気象庁の JSON（amedastable.json / area.json）を取得し、緯度経度の十進度化と地域階層のフラット化を行って `.fdl/` に NDJSON として保存し、dbt build でテーブルを再生成する。ビルドは `bash scripts/build.sh local` で実行する。
+main.py が気象庁の JSON（amedastable.json / area.json）と平年値ダウンロードの日別平年値 ZIP（normal_amedas_daily）を取得し、緯度経度の十進度化・地域階層のフラット化・日別平年値の観測所×月日への展開と実単位へのスケールを行って `.fdl/` に NDJSON として保存し、dbt build でテーブルを再生成する。ビルドは `bash scripts/build.sh local` で実行する。
 
 ## ライセンス
 

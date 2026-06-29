@@ -1,0 +1,64 @@
+version: 2
+
+models:
+  - name: mart_jma_normals_daily
+    description: >-
+      アメダス観測所の日別平年値（統計期間1991〜2020年）。観測所×月日ごとに
+      日平均・日最高・日最低気温、日照時間、降水量、積雪の深さの30年平均を収録。
+      station_idでmart_jma_stationsと結合できる。観測していない要素や統計値なしの
+      日はNULL。2月は閏日（29日）まで収録する。
+    access: public
+    config:
+      contract:
+        enforced: true
+    meta:
+      title: "気象庁 日別平年値（アメダス）"
+      tags: ["気象", "平年値", "気温", "降水量", "アメダス", "気象庁"]
+      source_url: "https://www.data.jma.go.jp/stats/data/mdrr/normal/index.html"
+      published: true
+    columns:
+      - name: station_id
+        data_type: VARCHAR
+        meta:
+          title: 観測所ID
+          description: アメダス番号（5桁）。mart_jma_stationsと結合できる
+      - name: month
+        data_type: INTEGER
+        meta:
+          title: 月
+          description: 1〜12
+      - name: day
+        data_type: INTEGER
+        meta:
+          title: 日
+          description: 1〜31（2月は閏日29日まで）
+      - name: temp_avg_c
+        data_type: DOUBLE
+        meta:
+          title: 日平均気温の平年値
+          description: 摂氏（℃）
+      - name: temp_max_c
+        data_type: DOUBLE
+        meta:
+          title: 日最高気温の平年値
+          description: 摂氏（℃）
+      - name: temp_min_c
+        data_type: DOUBLE
+        meta:
+          title: 日最低気温の平年値
+          description: 摂氏（℃）
+      - name: sunshine_hours
+        data_type: DOUBLE
+        meta:
+          title: 日照時間の平年値
+          description: 時間
+      - name: precipitation_mm
+        data_type: DOUBLE
+        meta:
+          title: 降水量の平年値
+          description: ミリメートル（mm）
+      - name: snow_depth_cm
+        data_type: INTEGER
+        meta:
+          title: 積雪の深さ（日最大）の平年値
+          description: センチメートル（cm）
