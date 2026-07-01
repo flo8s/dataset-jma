@@ -74,3 +74,25 @@ models:
         description: 震源決定に使用した観測点数
       - name: hypocenter_flag
         description: 震源決定フラグ（K/S/k/s/A/a/N/F）
+
+  - name: raw_jma_forecasts
+    description: 府県予報区ごとの短期天気予報（forecast JSONをclass10区域×対象日時に展開したもの）の生データ
+    columns:
+      - name: office_code
+        description: 府県予報区コード（area.jsonのoffices）
+      - name: report_datetime
+        description: 発表日時（ISO8601文字列、日本標準時）
+      - name: area_code
+        description: 一次細分区域コード（class10）
+      - name: area_name
+        description: 一次細分区域名
+      - name: forecast_datetime
+        description: 予報対象日時（ISO8601文字列、日本標準時）
+      - name: weather_code
+        description: 天気予報コード
+      - name: weather
+        description: 天気の予報文
+      - name: wind
+        description: 風の予報文
+      - name: wave
+        description: 波の予報文（内陸はNULL）
