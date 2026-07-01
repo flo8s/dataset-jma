@@ -1,11 +1,12 @@
 ## データ出典
 
-[気象庁](https://www.jma.go.jp/)が公開している気象・地震データです。観測所一覧（アメダス）・予報区の地域コードと、地震月報（カタログ編）の震源データを収録しています。
+[気象庁](https://www.jma.go.jp/)が公開している気象・地震データです。観測所一覧（アメダス）・予報区の地域コード、府県予報区ごとの短期天気予報と、地震月報（カタログ編）の震源データを収録しています。
 
-観測所一覧・地域コードは非公式の JSON 配信（気象庁サイトが内部利用しているエンドポイント）を出典として利用しています。
+観測所一覧・地域コード・天気予報は非公式の JSON 配信（気象庁サイトが内部利用しているエンドポイント）を出典として利用しています。
 
 - 観測所一覧: https://www.jma.go.jp/bosai/amedas/const/amedastable.json
 - 地域コード: https://www.jma.go.jp/bosai/common/const/area.json
+- 天気予報: https://www.jma.go.jp/bosai/forecast/
 - 震源データ（地震月報 カタログ編）: https://www.data.jma.go.jp/eqev/data/bulletin/hypo.html
 
 ## テーブル: mart_jma_stations
@@ -49,9 +50,25 @@
 - station_count: 震源決定に使用した観測点数（INTEGER）
 - hypocenter_flag: 震源決定フラグ（VARCHAR、K:気象庁震源 S:参考震源 k/s:簡易 A/a:自動 N:震源固定等 F:遠地）
 
+## テーブル: mart_jma_forecast_weather
+
+府県予報区ごとの短期天気予報（今日・明日・明後日）です。一次細分区域（class10）別に、対象日時ごとの天気・風・波を持ちます。area_code で mart_jma_areas（level=class10）と、office_code で mart_jma_areas（level=office）と結合できます。
+
+天気予報は発表のたびに更新されるため、本テーブルはビルド時点の最新発表（report_datetime）の 1 スナップショットです。ビルド（月次）ごとに置き換わります。
+
+- office_code: 府県予報区コード（VARCHAR、発表元。area.json の offices）
+- report_datetime: 発表日時（TIMESTAMP WITH TIME ZONE、日本標準時）
+- area_code: 区域コード（VARCHAR、一次細分区域 class10）
+- area_name: 区域名（VARCHAR）
+- forecast_datetime: 予報対象日時（TIMESTAMP WITH TIME ZONE、日本標準時。今日・明日・明後日）
+- weather_code: 天気予報コード（VARCHAR、例 100:晴れ 200:くもり）
+- weather: 天気の予報文（VARCHAR）
+- wind: 風の予報文（VARCHAR）
+- wave: 波の予報文（VARCHAR、内陸の区域は NULL）
+
 ### データ更新手順
 
-main.py が気象庁の JSON（amedastable.json / area.json）と地震月報（カタログ編）の年別震源 ZIP（96 バイト固定長）を取得し、緯度経度の十進度化・地域階層のフラット化・震源レコードの解析を行って `.fdl/` に NDJSON として保存し、dbt build でテーブルを再生成する。ビルドは `bash scripts/build.sh local` で実行する。震源データの収録年は main.py の `HYPOCENTER_YEARS` で調整する。
+main.py が気象庁の JSON（amedastable.json / area.json / 府県予報区ごとの forecast）と地震月報（カタログ編）の年別震源 ZIP（96 バイト固定長）を取得し、緯度経度の十進度化・地域階層のフラット化・天気予報の区域×対象日時への展開・震源レコードの解析を行って `.fdl/` に NDJSON として保存し、dbt build でテーブルを再生成する。ビルドは `bash scripts/build.sh local` で実行する。震源データの収録年は main.py の `HYPOCENTER_YEARS` で調整する。
 
 ## ライセンス
 

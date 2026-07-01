@@ -1,0 +1,63 @@
+version: 2
+
+models:
+  - name: mart_jma_forecast_weather
+    description: >-
+      気象庁の府県予報区ごとの短期天気予報（今日・明日・明後日）。一次細分区域
+      （class10）別の天気・風・波を対象日時ごとに収録する。area_codeでmart_jma_areas
+      （level=class10）と結合できる。ビルド時点の最新発表（report_datetime）の1
+      スナップショットで、月次ビルドごとに更新される。波は内陸の区域ではNULL。
+    access: public
+    config:
+      contract:
+        enforced: true
+    meta:
+      title: "気象庁 天気予報（短期）"
+      tags: ["気象", "天気予報", "予報区", "気象庁", "天気"]
+      source_url: "https://www.jma.go.jp/bosai/forecast/"
+      published: true
+    columns:
+      - name: office_code
+        data_type: VARCHAR
+        meta:
+          title: 府県予報区コード
+          description: 発表元の府県予報区（area.jsonのoffices）。mart_jma_areasのlevel=officeと結合できる
+      - name: report_datetime
+        data_type: TIMESTAMP WITH TIME ZONE
+        meta:
+          title: 発表日時
+          description: この予報の発表時刻（JST）
+      - name: area_code
+        data_type: VARCHAR
+        meta:
+          title: 区域コード
+          description: 一次細分区域（class10）。mart_jma_areasのlevel=class10と結合できる
+      - name: area_name
+        data_type: VARCHAR
+        meta:
+          title: 区域名
+      - name: forecast_datetime
+        data_type: TIMESTAMP WITH TIME ZONE
+        meta:
+          title: 予報対象日時
+          description: この予報が対象とする日時（JST）。今日・明日・明後日
+      - name: weather_code
+        data_type: VARCHAR
+        meta:
+          title: 天気コード
+          description: 気象庁の天気予報コード（例 100=晴れ、200=くもり）
+      - name: weather
+        data_type: VARCHAR
+        meta:
+          title: 天気
+          description: 天気の予報文
+      - name: wind
+        data_type: VARCHAR
+        meta:
+          title: 風
+          description: 風の予報文
+      - name: wave
+        data_type: VARCHAR
+        meta:
+          title: 波
+          description: 波の予報文。内陸の区域ではNULL

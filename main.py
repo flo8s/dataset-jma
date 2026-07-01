@@ -1,14 +1,15 @@
 """気象庁データ取得 + dbt ビルド + メタデータ生成パイプライン。
 
-非公式 JSON API からマスタ（観測所一覧・地域コード）を取得し、地震月報（カタログ編）の
-震源データ（96 バイト固定長）を取得・整形して、DuckDB が読みやすい NDJSON に整形して
-.fdl/ に保存してから dbt を実行する。
+非公式 JSON API からマスタ（観測所一覧・地域コード）と府県予報区ごとの短期天気予報を
+取得し、地震月報（カタログ編）の震源データ（96 バイト固定長）を取得・整形して、DuckDB が
+読みやすい NDJSON に整形して .fdl/ に保存してから dbt を実行する。
 """
 
 import io
 import json
 import re
 import time
+import urllib.error
 import urllib.request
 import zipfile
 from pathlib import Path
@@ -26,6 +27,12 @@ HYPOCENTER_BASE_URL = "https://www.data.jma.go.jp/eqev/data/bulletin/data/hypo"
 # 現時点の最新確定年は 2023 年。年を追加すれば取り込み範囲を拡張できる。
 HYPOCENTER_YEARS = [2019, 2020, 2021, 2022, 2023]
 
+# 府県予報区ごとの天気予報 JSON。area.json の offices（府県予報区）コードを URL に埋める。
+# 各ファイルの先頭要素が短期予報（今日・明日・明後日）で、その timeSeries[0] が
+# 一次細分区域（class10）別の天気・風・波。ビルド時点の最新発表を 1 スナップショット取得する。
+# https://www.jma.go.jp/bosai/forecast/
+FORECAST_BASE_URL = "https://www.jma.go.jp/bosai/forecast/data/forecast"
+
 # 気象庁サーバーへの配慮。連続リクエストの最小間隔（秒）と識別用 User-Agent。
 # 時間をかけてでもゆったりアクセスする方針。obsdl 等のバッチ取得でも同じ間隔を使う。
 REQUEST_INTERVAL_SEC = 3.0
@@ -37,6 +44,7 @@ FDL_DIR = Path(".fdl")
 STATIONS_PATH = FDL_DIR / "jma_stations.ndjson"
 AREAS_PATH = FDL_DIR / "jma_areas.ndjson"
 HYPOCENTERS_PATH = FDL_DIR / "jma_hypocenters.ndjson"
+FORECASTS_PATH = FDL_DIR / "jma_forecasts.ndjson"
 
 # 気象官署（管区・地方気象台や測候所相当）の観測所種別。
 # amedas のうち type A/B が気象官署に相当する。
@@ -68,6 +76,7 @@ def main() -> None:
     _build_stations()
     _build_areas()
     _build_hypocenters()
+    _build_forecasts()
 
     dbt = dbtRunner()
 
@@ -275,6 +284,75 @@ def _build_hypocenters() -> None:
                 count += year_count
                 print(f"    h{year}: {year_count} hypocenters")
     print(f"  jma_hypocenters.ndjson: {count} hypocenters")
+
+
+def _forecast_weather_rows(office_code: str, data: list) -> list[dict]:
+    """府県予報区の予報 JSON から短期天気予報（class10 別）の行を取り出す。
+
+    先頭要素が短期予報で、その timeSeries[0] が天気・風・波の時系列。timeSeries[0]
+    の各エリア（一次細分区域）× timeDefines（今日・明日・明後日）で 1 行を作る。
+    波（waves）は内陸の区域には無いので欠損を許容する。
+    """
+    if not data:
+        return []
+    short_term = data[0]
+    report_datetime = short_term.get("reportDatetime")
+    series = short_term.get("timeSeries") or []
+    if not series:
+        return []
+    weather = series[0]
+    time_defines = weather.get("timeDefines") or []
+    rows = []
+    for area in weather.get("areas") or []:
+        area_info = area.get("area") or {}
+        area_code = area_info.get("code")
+        area_name = area_info.get("name")
+        codes = area.get("weatherCodes") or []
+        texts = area.get("weathers") or []
+        winds = area.get("winds") or []
+        waves = area.get("waves") or []
+        for i, forecast_datetime in enumerate(time_defines):
+            rows.append(
+                {
+                    "office_code": office_code,
+                    "report_datetime": report_datetime,
+                    "area_code": area_code,
+                    "area_name": area_name,
+                    "forecast_datetime": forecast_datetime,
+                    "weather_code": codes[i] if i < len(codes) else None,
+                    "weather": texts[i] if i < len(texts) else None,
+                    "wind": winds[i] if i < len(winds) else None,
+                    "wave": waves[i] if i < len(waves) else None,
+                }
+            )
+    return rows
+
+
+def _build_forecasts() -> None:
+    """府県予報区ごとの短期天気予報を取得し、class10 区域×対象日時の NDJSON に整形する。
+
+    予報対象の区域は area.json の offices（府県予報区）。区域コードは area.json の
+    class10 と一致し mart_jma_areas と結合できる。ビルド時点の最新発表を取得する。
+    """
+    area = _fetch_json(AREA_URL)
+    office_codes = sorted(area.get("offices", {}).keys())
+    count = 0
+    offices = 0
+    with FORECASTS_PATH.open("w", encoding="utf-8") as f:
+        for office_code in office_codes:
+            url = f"{FORECAST_BASE_URL}/{office_code}.json"
+            try:
+                data = _fetch_json(url)
+            except urllib.error.HTTPError as exc:
+                # 予報を提供しない区域（例: 別区域に統合済み）は 404 になり得る。
+                print(f"    forecast {office_code}: skip ({exc.code})")
+                continue
+            rows = _forecast_weather_rows(office_code, data)
+            for row in rows:
+                f.write(json.dumps(row, ensure_ascii=False) + "\n")
+            count += len(rows)
+            offices += 1
+    print(f"  jma_forecasts.ndjson: {count} rows / {offices} offices")
 
 
 if __name__ == "__main__":
